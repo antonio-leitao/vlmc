@@ -11,6 +11,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 rand = "0.8.4"
+hashbrown = "0.13"
 
 [dependencies.pyo3]
 version = "0.18.0"
