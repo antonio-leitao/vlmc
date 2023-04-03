@@ -74,10 +74,13 @@ fn count_subsequences_parallel(
 
 fn count_subsequences(data: Vec<Vec<u32>>, max_depth: usize) -> HashMap<Vec<u32>, Node> {
     let mut counts: HashMap<Vec<u32>, Node> = HashMap::new();
+    let mut zero_counts: usize = 0;
+    let mut zero_successors: HashSet<u32> = HashSet::new();
     for seq in data {
+        zero_counts += seq.len();
         let n = seq.len().min(max_depth);
-
         for i in 0..seq.len() {
+            zero_successors.insert(seq[i]);
             for j in i..(i + n).min(seq.len()) {
                 let subseq = &seq[i..=j];
                 let node = counts.entry(subseq.to_vec()).or_insert(Node::new());
@@ -92,10 +95,15 @@ fn count_subsequences(data: Vec<Vec<u32>>, max_depth: usize) -> HashMap<Vec<u32>
             }
         }
     }
+    let zero_node = Node {
+        count: zero_counts,
+        precedents: HashSet::new(),
+        successors: zero_successors,
+    };
+    counts.insert(vec![], zero_node);
     counts
 }
 //------------------------------------------------------
-
 
 //-------------------- MAIN CLASS ----------------------
 #[pyclass(name = "VLMC")]
@@ -105,7 +113,7 @@ struct VLMCObject {
     n_jobs: NumJobs,
     #[pyo3(get)]
     counts: usize,
-    nodes: HashMap<Vec<u32>,Node>
+    nodes: HashMap<Vec<u32>, Node>,
 }
 
 #[pymethods]
@@ -118,15 +126,13 @@ impl VLMCObject {
             alphabet_size: alphabet_size,
             n_jobs: NumJobs::from_i32(n_jobs),
             counts: 0,
-            nodes : HashMap::new()
+            nodes: HashMap::new(),
         }
     }
 
     //THIS ONE IS IMPORTANT NOT JUST FOR SKLEARN API BUT ALSO
     // TO AVOID UNNECESSARY CHECKS DOWN THE LINE.
-    fn check_params(&self){
-    }
-
+    fn check_params(&self) {}
 
     #[pyo3(signature = (data))]
     fn fit(&mut self, data: Vec<Vec<u32>>) -> PyResult<()> {
@@ -160,31 +166,30 @@ impl VLMCObject {
         Ok(())
     }
 
-
-
-    fn get_suffix(&self, sequence: Vec<u32>) -> &Node{
+    fn get_suffix(&self, sequence: Vec<u32>) -> &Node {
         let mut sequence = sequence;
         while !sequence.is_empty() {
-            match self.nodes.get(&sequence){
-                Some(node)=> {return node},
-                None => sequence.remove(0)
+            match self.nodes.get(&sequence) {
+                Some(node) => return node,
+                None => sequence.remove(0),
             };
         }
         self.nodes.get(&vec![]).unwrap()
     }
 
-    fn get_distribution(&self, sequence: Vec<u32>)->Vec<u32>{
-        let distribution:Vec<u32> = vec![0; self.alphabet_size];
+    fn get_distribution(&self, sequence: Vec<u32>) -> Vec<usize> {
+        let distribution: Vec<usize> = vec![0; self.alphabet_size];
         let node = self.nodes.get(&sequence).unwrap();
-        for successor in node.successors{
-
+        for successor in node.successors {
+            let mut query_sequence:Vec<u32> = sequence.clone();
+            query_sequence.push(successor);
+            distribution[successor as usize]= self.nodes.get(&query_sequence).unwrap().count;
         }
-        discribution
-    }
+        distribution
 
+    }
 }
 //------------------------------------------------------
-
 
 /// A Python module implemented in Rust. The name of this function must match
 /// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to
