@@ -138,13 +138,13 @@ impl VLMCObject {
     fn fit(&mut self, data: Vec<Vec<u32>>) -> PyResult<()> {
         match self.n_jobs {
             NumJobs::One => {
-                self.counts = count_subsequences(data, self.max_depth)
+                self.counts = count_subsequences(data, self.max_depth + 1)
                     .into_values()
                     .map(|node| node.count)
                     .sum();
             }
             NumJobs::Many(num_jobs) => {
-                self.counts = count_subsequences_parallel(data, self.max_depth, num_jobs)
+                self.counts = count_subsequences_parallel(data, self.max_depth + 1, num_jobs)
                     .into_values()
                     .map(|node| node.count)
                     .sum();
@@ -155,17 +155,19 @@ impl VLMCObject {
     }
     #[pyo3(signature = (data))]
     fn fit_transform(&mut self, data: Vec<Vec<u32>>) -> PyResult<()> {
+        //max_depth has tp be plus 1 so we get the successors of the sequences at max depth.
         match self.n_jobs {
             NumJobs::One => {
-                self.nodes = count_subsequences(data, self.max_depth);
+                self.nodes = count_subsequences(data, self.max_depth + 1);
             }
             NumJobs::Many(num_jobs) => {
-                self.nodes = count_subsequences_parallel(data, self.max_depth, num_jobs);
+                self.nodes = count_subsequences_parallel(data, self.max_depth + 1, num_jobs);
             }
         }
         Ok(())
     }
-
+}
+impl VLMCObject {
     fn get_suffix(&self, sequence: Vec<u32>) -> &Node {
         let mut sequence = sequence;
         while !sequence.is_empty() {
@@ -178,17 +180,53 @@ impl VLMCObject {
     }
 
     fn get_distribution(&self, sequence: Vec<u32>) -> Vec<usize> {
-        let distribution: Vec<usize> = vec![0; self.alphabet_size];
+        //node has to exist and be less or equal to max_depth
+        let mut distribution: Vec<usize> = vec![0; self.alphabet_size];
         let node = self.nodes.get(&sequence).unwrap();
-        for successor in node.successors {
-            let mut query_sequence:Vec<u32> = sequence.clone();
-            query_sequence.push(successor);
-            distribution[successor as usize]= self.nodes.get(&query_sequence).unwrap().count;
+        for successor in &node.successors {
+            distribution[*successor as usize] = self.get_successor_counts(&sequence, *successor);
         }
         distribution
+    }
+    fn prune_tree(&mut self) {
+        //starts at 0
+        //iterates down untill max_depth or loglogn
+        //if condition is satisfied adds node to nodes to visit
+        //next node to visit
+        //if condition not satisfied remove node
+    }
+    fn peres_shield_divergence(&self, seq1: Vec<u32>, seq2: Vec<u32>) -> f32 {
+        let N_v = self.nodes.get(&seq1).unwrap();
+        let N_w = self.nodes.get(&seq2).unwrap();
+        let mut max_divergence: f32 = 0.0;
 
+        for successor in N_v.successors.union(&N_w.successors) {
+            let divergence: f32;
+            let N_va = self.get_successor_counts(&seq1, *successor);
+            let N_wa = self.get_successor_counts(&seq2, *successor);
+            if N_w.count == 0 {
+                divergence = N_w.count as f32;
+            } else {
+                divergence =
+                    (N_va as f32 - (N_wa as f32 * N_v.count as f32 / N_w.count as f32)).abs();
+            }
+            if divergence >= max_divergence {
+                max_divergence = divergence;
+            }
+        }
+        max_divergence
+    }
+
+    fn get_successor_counts(&self, sequence: &Vec<u32>, successor: u32) -> usize {
+        let mut query_sequence: Vec<u32> = sequence.clone();
+        query_sequence.push(successor);
+        match self.nodes.get(&query_sequence) {
+            Some(node) => return node.count,
+            None => return 0,
+        }
     }
 }
+
 //------------------------------------------------------
 
 /// A Python module implemented in Rust. The name of this function must match
