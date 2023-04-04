@@ -1,5 +1,6 @@
 use hashbrown::{HashMap, HashSet};
 use pyo3::prelude::*;
+use std::collections::VecDeque;
 use std::thread;
 
 //------------------ STRUCTURES ---------------------
@@ -17,6 +18,25 @@ impl Node {
             successors: HashSet::new(),
         }
     }
+    fn predecessor_sequences(&self, key: &[u32]) -> Vec<Vec<u32>> {
+        let mut pred_seqs = Vec::new();
+        for pred_key in &self.precedents {
+            let mut pred_seq = vec![*pred_key];
+            pred_seq.extend_from_slice(key);
+            pred_seqs.push(pred_seq);
+        }
+        pred_seqs
+    }
+}
+
+#[test]
+fn test_predecessor_sequences() {
+    let mut node = Node::new();
+    node.precedents.insert(4);
+    node.precedents.insert(5);
+    let key = vec![1, 2, 3];
+    let pred_seqs = node.predecessor_sequences(&key);
+    assert_eq!(pred_seqs, vec![vec![4, 1, 2, 3], vec![5, 1, 2, 3]]);
 }
 
 enum NumJobs {
@@ -114,6 +134,7 @@ struct VLMCObject {
     #[pyo3(get)]
     counts: usize,
     nodes: HashMap<Vec<u32>, Node>,
+    total_symbols: usize,
 }
 
 #[pymethods]
@@ -127,6 +148,7 @@ impl VLMCObject {
             n_jobs: NumJobs::from_i32(n_jobs),
             counts: 0,
             nodes: HashMap::new(),
+            total_symbols: 0,
         }
     }
 
@@ -164,6 +186,7 @@ impl VLMCObject {
                 self.nodes = count_subsequences_parallel(data, self.max_depth + 1, num_jobs);
             }
         }
+        self.total_symbols = self.nodes.get(&vec![]).unwrap().count;
         Ok(())
     }
 }
@@ -188,27 +211,77 @@ impl VLMCObject {
         }
         distribution
     }
-    fn prune_tree(&mut self) {
-        //starts at 0
-        //iterates down untill max_depth or loglogn
-        //if condition is satisfied adds node to nodes to visit
-        //next node to visit
-        //if condition not satisfied remove node
+    fn ps_extend_sequence(
+        &self,
+        parent_key: Vec<u32>,
+        maximum_extension: usize,
+        divergence_threshold: f32,
+    ) -> Vec<Vec<u32>> {
+        let mut queue = VecDeque::new();
+        let mut accepted_sequences = Vec::new();
+        let maximum_len = self.max_depth.min(parent_key.len() + maximum_extension);
+        queue.push_back(parent_key.clone());
+        while let Some(key) = queue.pop_front() {
+            for child_key in self.nodes.get(&key).unwrap().predecessor_sequences(&key) {
+                if child_key.len() > maximum_len {
+                    break;
+                }
+                if self.peres_shield_divergence(&parent_key, &child_key) <= divergence_threshold {
+                    continue;
+                }
+                queue.push_back(child_key.clone());
+                accepted_sequences.push(child_key);
+            }
+        }
+        accepted_sequences
     }
-    fn peres_shield_divergence(&self, seq1: Vec<u32>, seq2: Vec<u32>) -> f32 {
-        let N_v = self.nodes.get(&seq1).unwrap();
-        let N_w = self.nodes.get(&seq2).unwrap();
+    fn ps_prune_tree(&mut self) {
+        //threshold parameters
+        let maximum_extension = (self.total_symbols as f32).log(10.0).log(10.0) as usize;
+        let divergence_threshold = (self.total_symbols as f32).powf(3.0 / 4.0);
+
+        //instantiate data structures
+        let mut definitive_seqs = HashSet::new();
+        let mut queue = VecDeque::new();
+
+        //Add the root node
+        definitive_seqs.insert(vec![]);
+        queue.push_back(vec![]);
+
+        //iterate top-down
+        while let Some(parent_sequence) = queue.pop_front() {
+            //stop if depth exceeded;
+            if parent_sequence.len() == self.max_depth {
+                continue;
+            }
+            //expand breath first on each node
+            for new_parent in
+                self.ps_extend_sequence(parent_sequence, maximum_extension, divergence_threshold)
+            {
+                //if it has been already evaluated move on
+                if !definitive_seqs.insert(new_parent.clone()) {
+                    continue;
+                }
+                //else add it to the queue
+                queue.push_back(new_parent)
+            }
+        }
+    }
+
+    fn peres_shield_divergence(&self, seq1: &Vec<u32>, seq2: &Vec<u32>) -> f32 {
+        let n_v = self.nodes.get(seq1).unwrap();
+        let n_w = self.nodes.get(seq2).unwrap();
         let mut max_divergence: f32 = 0.0;
 
-        for successor in N_v.successors.union(&N_w.successors) {
+        for successor in n_v.successors.union(&n_w.successors) {
             let divergence: f32;
-            let N_va = self.get_successor_counts(&seq1, *successor);
-            let N_wa = self.get_successor_counts(&seq2, *successor);
-            if N_w.count == 0 {
-                divergence = N_w.count as f32;
+            let n_va = self.get_successor_counts(seq1, *successor);
+            let n_wa = self.get_successor_counts(seq2, *successor);
+            if n_w.count == 0 {
+                divergence = n_w.count as f32;
             } else {
                 divergence =
-                    (N_va as f32 - (N_wa as f32 * N_v.count as f32 / N_w.count as f32)).abs();
+                    (n_va as f32 - (n_wa as f32 * n_v.count as f32 / n_w.count as f32)).abs();
             }
             if divergence >= max_divergence {
                 max_divergence = divergence;
