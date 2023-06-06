@@ -1,11 +1,25 @@
 # Variable Length Markov Model (VLMC)
+
+[![Downloads](https://pepy.tech/badge/vlmc)](https://pepy.tech/project/vlmc) 
+[![PyPI version](https://badge.fury.io/py/vlmc.svg)](https://pypi.org/project/vlmc/)
+
 Implementation of Variable Length Markov Chains (VLMC) for Python.
-Suffix tree building is done top-down using the ![Peres-Shield](https://link.springer.com/chapter/10.1007/11557067_24) order estimation method.
-It is written in Rust and ported to Python with PyO3.
+Suffix tree building is done top-down using the [Peres-Shield](https://link.springer.com/chapter/10.1007/11557067_24) order estimation method.
+It is written in Rust with Python Bindings.
+
+##### Contents
+  - [Installation](#installation)
+    * [Compiling from source](#compilation-from-source)  
+  - [Usage](#usage)
+    - [`fit`](#fit)
+    - [`suffix`](#get_suffix)
+    - [`counts`](#get_counts)
+    - [`distribution`](#get_distribution)
+    - [`contexts`](#get_contexts)
+  - [Future](#todo)
+
 
 ## Installation
-
-### Installation with pip 
 
 Pre-built packages for many Linux, Windows, and OSX systems are available
 in [PyPI](https://pypi.org/project/vlmc/) and can be installed with:
@@ -14,15 +28,10 @@ in [PyPI](https://pypi.org/project/vlmc/) and can be installed with:
 pip install vlmc
 ```
 On uncommon architectures, you may need to first
-[install Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
-(i.e., the Rust programming language) first, and a subsequent
-`pip install vlmc` will try to compile the package for your CPU architecture and operating system.
-
+[install Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html) before running `pip install vlmc`.
 ### Compilation from source
 
-You need to [install Rust/Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html).
-
-Installation uses [maturin](https://github.com/PyO3/maturin#maturin) for compiling and installing the Rust extension.
+In order to compile from source you will need to [install Rust/Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html) and [maturin](https://github.com/PyO3/maturin#maturin) for the python bindings.
 Maturin is best used within a Python virtual environment:
 
 ```sh
@@ -34,7 +43,7 @@ cd vlmc
 maturin develop --release
 ```
 
-# Basic Usage
+# Usage
 
 ```python
 import vlmc
@@ -45,24 +54,23 @@ Parameters:
 - `alphabet_size`: Total number of symbols in the alphabet. This number has to be bigger than the highest integer encountered, else it will cause runtime errors. 
 - `n_jobs`: Number of subprocesses to spawn when running the vlmc. Choose `-1` for using all available processes.  
 
-# Methods
-
 ### `fit`
+
+> **Note**
+> fit method returns `None` and not `self`. This is by design as to not expose the rust object to python.
 
 ```python
 data = [
-[1,2,3],
-[2,3],
-[1,0,1],
-[2]
+  [1,2,3],
+  [2,3],
+  [1,0,1],
+  [2]
 ]
 
 tree.fit(data)
 ```
-> **Note**
-> fit method returns `None` and not `self`. This is by design as to not expose the rust object to python.
 
-Parameters:
+Arguments:
 - `data`: List of lists containing sequences of discrete values to fit on. Values are assumed to be integers form `0` to `alphabet_size`. List is expected to be two dimensional.
 
 ### `get_suffix`
@@ -73,6 +81,7 @@ suffix = tree.get_suffix(sequence)
 ```
 Arguments:
 - `sequence`: list of integers representing a sequence of discrete varaibles. 
+
 Returns:
 - `suffix` : longest suffix of sequence that is present in the VLMC. 
 
@@ -84,7 +93,8 @@ Will throw a `KeyError` if the sequence is not a tree node. Consider using `get_
 counts = tree.get_counts(sequence)
 ```
 Arguments:
-- `sequence`: list of integers representing a sequence of discrete varaibles. 
+- `sequence`: list of integers representing a sequence of discrete varaibles.
+ 
 Returns:
 - `counts` : integer 
 
@@ -97,6 +107,7 @@ probabilities = tree.get_distribution(sequence)
 ```
 Arguments:
 - `sequence`: list of integers representing a sequence of discrete variables. 
+
 Returns:
 - `probabilities` : list of floats representing the probability of observing a specific state (index) as the next symbol.
 
@@ -114,3 +125,4 @@ After experimentation the best possible idea for paralelization would be to crea
 Hashmaps are then joined from longest to smallest.
 The hashmap at `max_depth + 1` can be discarded after.
 Could be very fast depending on merging algo.
+
