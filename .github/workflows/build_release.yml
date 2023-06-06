@@ -115,4 +115,6 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: upload
-          args: --username ${{ env.PYPI_USERNAME }} --password ${{ env.PYPI_PASSWORD }} --skip-existing *
+          username: ${{secrets.PYPI_USERNAME}}
+          password: ${{secrets.PYPI_PASSWORD}}
+          args: --skip-existing *
