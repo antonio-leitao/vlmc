@@ -42,17 +42,35 @@ impl VLMCObject {
         self._fit(data);
         Ok(())
     }
+    /// Gets the longest suffix of a sequence that is present in the VLMC.
     #[pyo3(signature = (sequence))]
     fn get_suffix(&self, sequence: Vec<usize>) -> Vec<usize> {
         self._suffix(&sequence)
     }
+    /// Gets the number of occurences of the specific sequence.
+    /// Throws an error if the sequence is not present.
     #[pyo3(signature = (sequence))]
-    fn get_counts(&self, sequence: Vec<usize>) -> u32 {
-        self._counts(&sequence)
+    fn get_counts(&self, sequence: Vec<usize>) -> PyResult<u32> {
+        match self.nodes.get(&sequence) {
+            Some(node) => Ok(node.count),
+            None => Err(pyo3::exceptions::PyKeyError::new_err("Sequence not present. Use self.get_suffix(sequence) to get the longest suffix present in the vlmc.")),
+        }
     }
+    /// Gets the transition probabilities given a sequence.
+    /// Throws an error if the sequence is not present.
     #[pyo3(signature = (sequence))]
-    fn get_distribution(&self, sequence: Vec<usize>) -> Vec<u32> {
-        self._distribution(&sequence).to_vec()
+    fn get_distribution(&self, sequence: Vec<usize>) -> PyResult<Vec<u32>> {
+        match self.nodes.get(&sequence) {
+            Some(node) => Ok(node.distribution.to_vec()),
+            None => Err(pyo3::exceptions::PyKeyError::new_err("Sequence not present. Use self.get_suffix(sequence) to get the longest suffix present in the vlmc.")),
+        }
+    }
+    /// Gets all contexts from the vlmc ordered by length
+    #[pyo3()]
+    fn get_contexts(&self) -> Vec<Vec<usize>> {
+        let mut keys: Vec<Vec<usize>> = self.nodes.keys().cloned().collect();
+        keys.sort_by(|a, b| a.len().cmp(&b.len()));
+        keys
     }
 }
 
@@ -73,18 +91,6 @@ impl VLMCObject {
             suffix = &suffix[1..];
         }
         suffix.to_vec()
-    }
-    fn _node(&self, sequence: &Vec<usize>) -> &Node {
-        let suffix = self._suffix(sequence);
-        self.nodes.get(&suffix).unwrap()
-    }
-    fn _counts(&self, sequence: &Vec<usize>) -> u32 {
-        let node = self._node(sequence);
-        node.count
-    }
-    fn _distribution(&self, sequence: &Vec<usize>) -> &Vec<u32> {
-        let node = self._node(sequence);
-        &node.distribution
     }
 }
 

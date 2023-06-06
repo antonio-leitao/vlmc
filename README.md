@@ -16,15 +16,35 @@ Parameters:
 
 # Methods
 
-### `fit_transform`
+### `fit`
 
 ```python
-tree.fit_transform(data)
+tree.fit(data)
 ```
 Parameters:
 -`data`: List of lists containing sequences of discrete values to fit on. Values are assumed to be integers form `0` to `alphabet_size`. List is expected to be two dimensional.
 
-### `get_distribution`
+### `get_context`
+Gets the vector of probabilities over the entire alphabet for the given sequence. If the sequence is not a node then its longest suffix will be used, check the `get_suffix` method below.
+
+```python
+context = tree.get_context(sequence)
+```
+Parameters:
+-`sequence`: list of integers representing a sequence of discrete varaibles. 
+Returns:
+- `context` : list of floats representing the probability of observing a specific state (index) as the next symbol.
+### `get_counts`
+Gets the vector of probabilities over the entire alphabet for the given sequence. If the sequence is not a node then its longest suffix will be used, check the `get_suffix` method below.
+
+```python
+counts = tree.get_counts(counts)
+```
+Parameters:
+-`sequence`: list of integers representing a sequence of discrete varaibles. 
+Returns:
+- `probabilities` : list of floats representing the probability of observing a specific state (index) as the next symbol.
+### `get_counts`
 Gets the vector of probabilities over the entire alphabet for the given sequence. If the sequence is not a node then its longest suffix will be used, check the `get_suffix` method below.
 
 ```python
@@ -69,3 +89,10 @@ matrix, labels = tree.adjacency_matrix
 Returns:
 - `matrix` : adjacency matrix representing the suffix tree.
 - `labels` : list of sequences associated with each node of the tree.
+
+# TODO
+### Paralelization
+After experimentation the best possible idea for paralelization would be to create different hashmaps for each sunsequence length.
+Hashmaps are then joined from longest to smallest.
+The hashmap at `max_depth + 1` can be discarded after.
+Could be very fast depending on merging algo.
