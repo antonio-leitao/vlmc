@@ -106,6 +106,9 @@ jobs:
           name: wheels
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
+        env:
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          PYPI_PASSWORD: ${{ secrets.PASSWORD }}
         with:
           command: upload
           args: -u ${{secrets.PYPI_USERNAME}} -p ${{secrets.PYPI_PASSWORD}} --skip-existing *
