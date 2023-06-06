@@ -1,11 +1,8 @@
 use hashbrown::{HashMap, HashSet};
 use pyo3::prelude::*;
-//use std::thread;
 mod peres_shield;
-
 //###################### PYTHON INTERFACE ##########################
 //Anything inside this section is exposed to python
-
 #[pymodule]
 fn vlmc(_py: Python, m: &PyModule) -> PyResult<()> {
     //m.add_function(wrap_pyfunction!(count_sequences, m)?)?;
@@ -14,7 +11,6 @@ fn vlmc(_py: Python, m: &PyModule) -> PyResult<()> {
 
     Ok(())
 }
-
 //--------------------------- MAIN CLASS ----------------------
 #[pyclass(name = "VLMC")]
 pub struct VLMCObject {

@@ -1,3 +1,13 @@
+[project]
+authors = [
+  { name="António Leitão", email="aleitao@novaims.unl.pt" },
+]
+description = "Variable Length Markov Chain"
+readme = "README.md"
+[project.urls]
+homepage = "https://github.com/antonio-leitao/vlmc"
+repository = "https://github.com/antonio-leitao/vlmc"
+
 [build-system]
 requires = ["maturin>=0.14,<0.15"]
 build-backend = "maturin"

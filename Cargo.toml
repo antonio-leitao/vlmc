@@ -3,7 +3,6 @@ name = "vlmc"
 version = "0.1.0"
 edition = "2021"
 
-
 [lib]
 name = "vlmc"
 # "cdylib" is necessary to produce a shared library for Python to import from.
@@ -12,8 +11,6 @@ crate-type = ["cdylib"]
 [dependencies]
 rand = "0.8.4"
 hashbrown = "0.13"
-rayon = "1.7"
-num_cpus = "*"
 
 [dependencies.pyo3]
 version = "0.18.0"
