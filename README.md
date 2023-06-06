@@ -3,11 +3,35 @@ Implementation of Variable Length Markov Chains (VLMC) for Python.
 Suffix tree building is done top-down using the ![Peres-Shield](https://link.springer.com/chapter/10.1007/11557067_24) order estimation method.
 It is written in Rust and ported to Python with PyO3.
 
-# Instalation
-You can install using `pip`.
+## Installation
 
-```shell
+### Installation with pip 
+
+Pre-built packages for many Linux, Windows, and OSX systems are available
+in [PyPI](https://pypi.org/project/vlmc/) and can be installed with:
+
+```sh
 pip install vlmc
+```
+On uncommon architectures, you may need to first
+[install Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
+(i.e., the Rust programming language) first, and a subsequent
+`pip install vlmc` will try to compile the package for your CPU architecture and operating system.
+
+### Compilation from source
+
+You need to [install Rust/Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html).
+
+Installation uses [maturin](https://github.com/PyO3/maturin#maturin) for compiling and installing the Rust extension.
+Maturin is best used within a Python virtual environment:
+
+```sh
+# activate your desired virtual environment first, then:
+pip install maturin
+git clone https://github.com/antonio-leitao/vlmc.git
+cd vlmc
+# build and install the package:
+maturin develop --release
 ```
 
 # Basic Usage
@@ -17,9 +41,9 @@ import vlmc
 tree = vlmc.VLMC(max_depth, alphabet_size, n_jobs=-1)
 ```
 Parameters:
--`max_depth`: Maximum depth of tree. Subsequences whose length exceed the `max_depth` will not be considered nor counted. 
--`alphabet_size`: Total number of symbols in the alphabet. This number has to be bigger than the highest integer encountered, else it will cause runtime errors. 
--`n_jobs`: Number of subprocesses to spawn when running the vlmc. Choose `-1` for using all available processes.  
+- `max_depth`: Maximum depth of tree. Subsequences whose length exceed the `max_depth` will not be considered nor counted. 
+- `alphabet_size`: Total number of symbols in the alphabet. This number has to be bigger than the highest integer encountered, else it will cause runtime errors. 
+- `n_jobs`: Number of subprocesses to spawn when running the vlmc. Choose `-1` for using all available processes.  
 
 # Methods
 
@@ -39,7 +63,7 @@ tree.fit(data)
 > fit method returns `None` and not `self`. This is by design as to not expose the rust object to python.
 
 Parameters:
--`data`: List of lists containing sequences of discrete values to fit on. Values are assumed to be integers form `0` to `alphabet_size`. List is expected to be two dimensional.
+- `data`: List of lists containing sequences of discrete values to fit on. Values are assumed to be integers form `0` to `alphabet_size`. List is expected to be two dimensional.
 
 ### `get_suffix`
 Given a sequence, returns the longest suffix that is present in the VLMC.
@@ -48,7 +72,7 @@ Given a sequence, returns the longest suffix that is present in the VLMC.
 suffix = tree.get_suffix(sequence)
 ```
 Arguments:
--`sequence`: list of integers representing a sequence of discrete varaibles. 
+- `sequence`: list of integers representing a sequence of discrete varaibles. 
 Returns:
 - `suffix` : longest suffix of sequence that is present in the VLMC. 
 
@@ -60,7 +84,7 @@ Will throw a `KeyError` if the sequence is not a tree node. Consider using `get_
 counts = tree.get_counts(sequence)
 ```
 Arguments:
--`sequence`: list of integers representing a sequence of discrete varaibles. 
+- `sequence`: list of integers representing a sequence of discrete varaibles. 
 Returns:
 - `counts` : integer 
 
@@ -72,7 +96,7 @@ Will throw a `KeyError` if the sequence is not a tree node. Consider using `get_
 probabilities = tree.get_distribution(sequence)
 ```
 Arguments:
--`sequence`: list of integers representing a sequence of discrete variables. 
+- `sequence`: list of integers representing a sequence of discrete variables. 
 Returns:
 - `probabilities` : list of floats representing the probability of observing a specific state (index) as the next symbol.
 
@@ -82,24 +106,7 @@ Returns:
 contexts = tree.get_contexts()
 ```
 Returns:
--`contexts`: list of relevant contexts according to the Peres-Shield tree prunning method. Contexts are ordered by length.
-
-
-## Parameters
-
-### `contexts`
-```python
-contexts = tree.contexts
-```
-Returns:
-- `contexts` : list of sequences of each node in the tree, each relevant context.
-### `adjacency_matrix`
-```python
-matrix, labels = tree.adjacency_matrix
-```
-Returns:
-- `matrix` : adjacency matrix representing the suffix tree.
-- `labels` : list of sequences associated with each node of the tree.
+- `contexts`: list of relevant contexts according to the Peres-Shield tree prunning method. Contexts are ordered by length.
 
 # TODO
 ### Paralelization
