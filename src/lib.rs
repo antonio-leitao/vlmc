@@ -154,7 +154,7 @@ fn count_subsequences(
     }
     let zero_node = Node {
         count: zero_counts,
-        precedents: HashSet::new(),
+        precedents: zero_successors.clone(),
         successors: zero_successors,
         distribution: zero_distribution,
     };
