@@ -47,12 +47,11 @@ maturin develop --release
 
 ```python
 import vlmc
-tree = vlmc.VLMC(max_depth, alphabet_size, n_jobs=-1)
+tree = vlmc.VLMC(alphabet_size,max_depth=10)
 ```
 Parameters:
-- `max_depth`: Maximum depth of tree. Subsequences whose length exceed the `max_depth` will not be considered nor counted. 
 - `alphabet_size`: Total number of symbols in the alphabet. This number has to be bigger than the highest integer encountered, else it will cause runtime errors. 
-- `n_jobs`: Number of subprocesses to spawn when running the vlmc. Choose `-1` for using all available processes.  
+- `max_depth`: Maximum depth of tree. Subsequences whose length exceed the `max_depth` will not be considered nor counted. 
 
 ### `fit`
 
