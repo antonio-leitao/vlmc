@@ -1,5 +1,14 @@
 /target
 /tests
+
+#PERSONAL
 Makefile
 paper.md
+paper.bib
 
+#MACOS stuff
+**/.DS_Store
+
+#docs
+/docs/node_modules/
+/docs/dist/

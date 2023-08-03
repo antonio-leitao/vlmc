@@ -1,9 +1,22 @@
-# Variable Length Markov Model (VLMC)
+Implementation of Variable Length M
+<h1 align="center">
+  <p>Variable Length Markov Model (VLMC)</p>
+</h1>
 
+
+<p align="center">
+  <a href="https://antonio-leitao.github.io/vlmc/">Documentation</a> •
+  <a href="https://github.com/Antonio-Leitao/components/tree/master">Paper</a> •
+  <a href="https://antonio-leitao.github.io/">Author</a> •
+  <a href="https://antonio-leitao.github.io/components/">Literature</a>
+</p>
+
+<div align="center">
+  
 [![Downloads](https://pepy.tech/badge/vlmc)](https://pepy.tech/project/vlmc) 
 [![PyPI version](https://badge.fury.io/py/vlmc.svg)](https://pypi.org/project/vlmc/)
 
-Implementation of Variable Length Markov Chains (VLMC) for Python.
+</div>arkov Chains (VLMC) for Python.
 Suffix tree building is done top-down using the [Peres-Shield](https://link.springer.com/chapter/10.1007/11557067_24) order estimation method.
 It is written in Rust with Python Bindings.
 
@@ -44,6 +57,7 @@ maturin develop --release
 ```
 
 # Usage
+Complete documentation is available [here](https://antonio-leitao.github.io/vlmc/)
 
 ```python
 import vlmc

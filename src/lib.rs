@@ -22,6 +22,19 @@ pub struct VLMCObject {
 
 #[pymethods]
 impl VLMCObject {
+    /// Creates a new 2D point with the given x and y coordinates.
+    ///
+    /// # Arguments
+    ///
+    /// * `x`: The x-coordinate of the point.
+    /// * `y`: The y-coordinate of the point.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use my_library::Point2D;
+    ///
+    /// let point = Point2D::new(3.0, 4.0);
     #[new]
     #[pyo3(signature = (alphabet_size, max_depth=10))]
     fn new(alphabet_size: usize, max_depth: usize) -> Self {
@@ -79,7 +92,7 @@ impl VLMCObject {
         self.nodes = raw_counts;
         self.total_symbols = self.nodes.get(&vec![]).unwrap().count;
         //prunes
-        self.peres_shield_prune();
+        self.prune();
     }
     fn _suffix(&self, sequence: &Vec<usize>) -> Vec<usize> {
         let mut suffix: &[usize] = sequence;

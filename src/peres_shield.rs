@@ -4,7 +4,7 @@ use std::collections::VecDeque;
 
 impl VLMCObject {
     // Define additional methods here
-    pub fn peres_shield_prune(&mut self) {
+    pub fn prune(&mut self) {
         //threshold parameters
         let maximum_extension = (self.total_symbols as f32).log(10.0).log(10.0).ceil() as usize;
         let divergence_threshold = (self.total_symbols as f32).powf(1.0 / 4.0);
@@ -22,7 +22,7 @@ impl VLMCObject {
                 continue;
             }
             //expand breath first on each node
-            for new_parent in self.peres_shield_extend_sequence(
+            for new_parent in self.prune_extend_sequence(
                 parent_sequence,
                 maximum_extension,
                 divergence_threshold,
@@ -38,7 +38,7 @@ impl VLMCObject {
         //discard all but the ones we selected
         self.nodes.retain(|key, _| definitive_seqs.contains(key));
     }
-    fn peres_shield_extend_sequence(
+    fn prune_extend_sequence(
         //FIXME &self when you finish debugging!!!!!!!!!!!
         &mut self,
         parent_key: Vec<usize>,
