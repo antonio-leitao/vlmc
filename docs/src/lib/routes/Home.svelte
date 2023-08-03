@@ -33,7 +33,9 @@
   <div class="subtitle">variable length markov chain</div>
     <CopyToClipboard text={"pip install vlmc"}/>   
     <div class="subtext"> 
-        Variable Length Markov Model is a rust based Python Package Applied for some stuff and some others too. Check the documentation below
+VLMC (Variable Length Markov Chains) is a powerful Rust package with Python bindings designed for modeling Variable Length Markov Chains.
+Markov chains are widely used in various fields to model sequential data, and the extension to Variable Length Markov Chains provides a more flexible approach in capturing complex dependencies within sequences.
+VLMC offers efficient numerical tools for constructing, training, and utilizing Variable Length Markov Chains, making it suitable for various applications in data analysis, natural language processing, and other sequential data tasks.
     </div>
   <div class="component_grid">
     {#each options as option}
