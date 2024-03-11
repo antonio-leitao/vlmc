@@ -1,8 +1,17 @@
-Implementation of Variable Length M
-<h1 align="center">
-  <p>Variable Length Markov Model (VLMC)</p>
-</h1>
 
+<p align="center">
+  <img src='images/logo.png' width='200px' align="center"></img>
+</p>
+
+<div align="center">
+<h3 max-width='200px' align="center">Decision Boundary Sampler</h3>
+  <p><i>Build variable length markov models<br/>
+  Blazingly fast top down approeach using the Peres-Shield method<br/>
+  Built with Rust</i><br/></p>
+  <p>
+    <img alt="Pepy Total Downlods" src="https://img.shields.io/pepy/dt/dbsampler?style=for-the-badge&logo=python&labelColor=white&color=blue">
+  </p>
+</div>
 
 <p align="center">
   <a href="https://antonio-leitao.github.io/vlmc/">Documentation</a> •
@@ -11,12 +20,8 @@ Implementation of Variable Length M
   <a href="https://antonio-leitao.github.io/components/">Literature</a>
 </p>
 
-<div align="center">
-  
-[![Downloads](https://pepy.tech/badge/vlmc)](https://pepy.tech/project/vlmc) 
-[![PyPI version](https://badge.fury.io/py/vlmc.svg)](https://pypi.org/project/vlmc/)
+Implementation of Variable Length Markov Chains (VLMC) for Python.
 
-</div>arkov Chains (VLMC) for Python.
 Suffix tree building is done top-down using the [Peres-Shield](https://link.springer.com/chapter/10.1007/11557067_24) order estimation method.
 It is written in Rust with Python Bindings.
 
