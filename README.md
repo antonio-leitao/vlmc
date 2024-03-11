@@ -1,17 +1,19 @@
 
 <p align="center">
-  <img src='images/logo.png' width='200px' align="center"></img>
+  <img src='assets/logo.png' width='200px' align="center"></img>
 </p>
 
 <div align="center">
-<h3 max-width='200px' align="center">Decision Boundary Sampler</h3>
+<h3 max-width='200px' align="center">Variable Length Markov Chain</h3>
   <p><i>Build variable length markov models<br/>
   Blazingly fast top down approeach using the Peres-Shield method<br/>
   Built with Rust</i><br/></p>
   <p>
-    <img alt="Pepy Total Downlods" src="https://img.shields.io/pepy/dt/dbsampler?style=for-the-badge&logo=python&labelColor=white&color=blue">
+<img alt="Pepy Total Downlods" src="https://img.shields.io/pepy/dt/vlmc?style=for-the-badge&logo=python&labelColor=white&color=blue">
   </p>
 </div>
+
+#
 
 <p align="center">
   <a href="https://antonio-leitao.github.io/vlmc/">Documentation</a> •
